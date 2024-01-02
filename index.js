@@ -1,3 +1,6 @@
+console.log("hello");
+// import _ from "./node_modules/lodash";
+
 let boardMap = new Map();
 
 class boardSquare {
@@ -49,34 +52,52 @@ class Board {
 let board = new Board(8, 8);
 
 function knightMoves(atSquare, toSquare) {
+	console.log(`Shortest Path from ${atSquare} to ${toSquare}:`);
 	atSquare = boardMap.get(atSquare);
 	toSquare = boardMap.get(toSquare);
+	if (!atSquare || !toSquare) {
+		console.log("Invalid Request");
+		return undefined;
+	}
 
 	let visited = new Set();
 	let q = [];
-	let prev = new Set();
+	let path = [];
 	q.push(atSquare);
 	while (q.length > 0) {
-		let temp = q.shift();
-		const connect = temp.edges;
-
-		for (const vertex of connect) {
-			if (vertex === toSquare) {
-				prev.add(temp);
-				prev.add(vertex);
-				return prev;
-			} else if (!visited.has(vertex) && vertex) {
-				prev.add(temp);
-				q.push(vertex);
-				visited.add(vertex);
+		let tempObj = q.shift();
+		let temp = tempObj.vertex ? tempObj.vertex : tempObj;
+		path = tempObj.myPath ? tempObj.myPath : path;
+		visited.add(temp);
+		path.push(temp);
+		const moves = [
+			temp?.left?.left?.down,
+			temp?.left?.left?.up,
+			temp?.left?.up?.up,
+			temp?.left?.down?.down,
+			temp?.right?.right?.up,
+			temp?.right?.right?.down,
+			temp?.right?.up?.up,
+			temp?.right?.down?.down,
+		];
+		for (const vertex of moves) {
+			if (vertex) {
+				if (vertex === toSquare) {
+					// console.log(vertex);
+					path.push(vertex);
+					return path;
+				} else if (!visited.has(vertex) && vertex) {
+					q.push({ vertex, myPath: [...path] });
+				}
 			}
 		}
 	}
+	return path;
 }
 
-let moves = knightMoves("5,2", "1,7");
+let moves = knightMoves(`${_.random(7)},${_.random(7)}`, `${_.random(7)},${_.random(7)}`);
 
-console.log(`You made it in ${moves.size} moves. Here is your path:`);
+console.log(`You made it in ${moves.length} moves. Here is your path:`);
 moves.forEach((set) => {
 	console.log(`[${set.xAxis},${set.yAxis}]`);
 });
